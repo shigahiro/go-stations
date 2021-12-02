@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/TechBowl-japan/go-stations/db"
+	"github.com/TechBowl-japan/go-stations/handler"
 )
 
 func main() {
@@ -56,7 +57,8 @@ func realMain() error {
 		io.WriteString(w, "Hello, world!\n")
 	}
 	mux.HandleFunc("/", helloHandler)
-	log.Fatal(http.ListenAndServe(defaultPort, nil))
+	mux.HandleFunc("/healthz", handler.HealthzHandler)
+	log.Fatal(http.ListenAndServe(defaultPort, mux))
 
 	return nil
 }
