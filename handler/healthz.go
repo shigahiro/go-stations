@@ -11,7 +11,6 @@ import (
 // A HealthzHandler implements health check endpoint.
 func HealthzHandler(w http.ResponseWriter, r *http.Request) {
 	healthResponse := model.HealthzResponse{Message: "OK"}
-	http.HandleFunc("/healthz", HealthzHandler)
 	if err := json.NewEncoder(w).Encode(healthResponse); err != nil {
 		log.Println(err)
 	}
