@@ -29,9 +29,13 @@ type (
 
 	// A UpdateTODORequest expresses ...
 	UpdateTODORequest struct {
+		ID          int    `json:"id"`
+		Subject     string `json:"subject"`
+		Description string `json:"description"`
 	}
 	// A UpdateTODOResponse expresses ...
 	UpdateTODOResponse struct {
+		TODO `json:"todo"`
 	}
 
 	// A DeleteTODORequest expresses ...
