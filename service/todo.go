@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/TechBowl-japan/go-stations/model"
 	_ "github.com/mattn/go-sqlite3"
@@ -28,17 +29,14 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 	)
 	todo := &model.TODO{}
 
-	// if subject == "" {
-	// 	return todo, nil
-	// }
-	// var err error
-	// s.db, err = sql.Open("sqlite", "schema.sql")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer s.db.Close()
+	db, err := sql.Open("sqlite3", ".sqlite3/todo.db")
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer db.Close()
 
-	result, err := s.db.ExecContext(ctx, insert, subject, description)
+	result, err := db.ExecContext(ctx, insert, subject, description)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +44,8 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 	if err != nil {
 		return nil, err
 	}
-	err = s.db.QueryRowContext(ctx, confirm, id).Scan(&todo.Subject, &todo.Description, &todo.CreatedAt, &todo.UpdatedAt)
+	todo.ID = int(id)
+	err = db.QueryRowContext(ctx, confirm, id).Scan(&todo.Subject, &todo.Description, &todo.CreatedAt, &todo.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}

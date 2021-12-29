@@ -58,6 +58,8 @@ func realMain() error {
 	}
 	mux.HandleFunc("/", helloHandler)
 	mux.HandleFunc("/healthz", handler.HealthzHandler)
+	var h handler.TODOHandler
+	mux.HandleFunc("/todos", h.CreateTODO)
 	log.Fatal(http.ListenAndServe(defaultPort, mux))
 
 	return nil
