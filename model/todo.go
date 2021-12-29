@@ -28,9 +28,11 @@ type (
 	ReadTODOResponse struct{}
 
 	// A UpdateTODORequest expresses ...
-	UpdateTODORequest struct{}
+	UpdateTODORequest struct {
+	}
 	// A UpdateTODOResponse expresses ...
-	UpdateTODOResponse struct{}
+	UpdateTODOResponse struct {
+	}
 
 	// A DeleteTODORequest expresses ...
 	DeleteTODORequest struct{}
