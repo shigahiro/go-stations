@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log"
 
 	"github.com/TechBowl-japan/go-stations/model"
@@ -71,8 +72,30 @@ func (s *TODOService) UpdateTODO(ctx context.Context, id int64, subject, descrip
 		update  = `UPDATE todos SET subject = ?, description = ? WHERE id = ?`
 		confirm = `SELECT subject, description, created_at, updated_at FROM todos WHERE id = ?`
 	)
+	if id == 0 || subject == "" {
+		return nil, errors.New("idもしくはsubjectがありません")
+	}
+	db := s.db
 
-	return nil, nil
+	result, err := db.ExecContext(ctx, update, subject, description, id)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	row, _ := result.RowsAffected()
+	if row == 0 {
+		return nil, &model.ErrNotFound{}
+	}
+
+	todo := model.TODO{}
+	// この一行間違ってる気がする
+	todo.ID = int(row)
+	err = db.QueryRowContext(ctx, confirm, id).Scan(&todo.Subject, &todo.Description, &todo.CreatedAt, &todo.UpdatedAt)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return &todo, nil
 }
 
 // DeleteTODO deletes TODOs on DB by ids.
