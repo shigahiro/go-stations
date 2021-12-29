@@ -38,15 +38,18 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 
 	result, err := db.ExecContext(ctx, insert, subject, description)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	todo.ID = int(id)
 	err = db.QueryRowContext(ctx, confirm, id).Scan(&todo.Subject, &todo.Description, &todo.CreatedAt, &todo.UpdatedAt)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	return todo, nil
