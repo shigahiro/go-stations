@@ -22,11 +22,8 @@ func TestStation8(t *testing.T) {
 	testcases := map[string]struct {
 		Subject     string
 		Description string
-		WantError   error
 	}{
-		"Subject is empty": {
-			WantError: sqlite3.ErrConstraint,
-		},
+		"Subject is empty": {},
 		"Description is empty": {
 			Subject: "todo subject",
 		},
@@ -39,39 +36,38 @@ func TestStation8(t *testing.T) {
 	dbpath := "./temp_test.db"
 	d, err := db.NewDB(dbpath)
 	if err != nil {
-		t.Error("エラーが発生しました", err)
+		t.Error("DBの作成に失敗しました。", err)
 		return
 	}
 
 	t.Cleanup(func() {
 		if err := d.Close(); err != nil {
-			t.Error("エラーが発生しました", err)
+			t.Error("DBのクローズに失敗しました。", err)
 			return
 		}
-	})
-	t.Cleanup(func() {
 		if err := os.Remove(dbpath); err != nil {
-			t.Error("エラーが発生しました", err)
+			t.Errorf("テスト用のDBファイルの削除に失敗しました: %v", err)
 			return
 		}
 	})
 
+	var sqlite3Err sqlite3.Error
+
 	for name, tc := range testcases {
+		name := name
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
 			svc := service.NewTODOService(d)
 			got, err := svc.CreateTODO(context.Background(), tc.Subject, tc.Description)
-			switch tc.WantError {
-			case nil:
-				if err != nil {
-					t.Error("エラーが発生しました", err)
-					return
+			if err != nil {
+				if !errors.As(err, &sqlite3Err) {
+					t.Errorf("期待していないエラーの Type です, got = %t, want = %+v", err, sqlite3Err)
 				}
-			default:
-				if !errors.As(err, &tc.WantError) {
-					t.Errorf("期待していないエラーの Type です, got = %t, want = %+v", err, tc.WantError)
+				if err.(sqlite3.Error).Code != sqlite3.ErrConstraint {
+					t.Errorf("期待していないsqlite3のエラーナンバーです, got = %d, want = %d", err.(sqlite3.Error).Code, sqlite3.ErrConstraint)
+					return
 				}
 				return
 			}

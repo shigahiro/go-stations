@@ -3,12 +3,13 @@ package main
 import (
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
 	"github.com/TechBowl-japan/go-stations/db"
-	"github.com/TechBowl-japan/go-stations/handler"
+	// TechBowlのコミットを取り込んだら削除されていた
+	// "github.com/TechBowl-japan/go-stations/handler"
+	"github.com/TechBowl-japan/go-stations/handler/router"
 )
 
 func main() {
@@ -49,18 +50,21 @@ func realMain() error {
 	}
 	defer todoDB.Close()
 
-	// set http handlers
-	mux := http.NewServeMux()
+	// NOTE: 新しいエンドポイントの登録はrouter.NewRouterの内部で行うようにする
+	mux := router.NewRouter(todoDB)
 
-	// TODO: ここから実装を行う
-	helloHandler := func(w http.ResponseWriter, req *http.Request) {
-		io.WriteString(w, "Hello, world!\n")
-	}
-	mux.HandleFunc("/", helloHandler)
-	mux.HandleFunc("/healthz", handler.HealthzHandler)
-	var h handler.TODOHandler
-	mux.HandleFunc("/todos", h.CreateTODO)
-	log.Fatal(http.ListenAndServe(defaultPort, mux))
+	// TechBowlのコミットを取り込んだら削除されていた
+	// helloHandler := func(w http.ResponseWriter, req *http.Request) {
+	// 	io.WriteString(w, "Hello, world!\n")
+	// }
+	// mux.HandleFunc("/", helloHandler)
+	// mux.HandleFunc("/healthz", handler.HealthzHandler)
+	// var h handler.TODOHandler
+	// mux.HandleFunc("/todos", h.CreateTODO)
+	// log.Fatal(http.ListenAndServe(defaultPort, mux))
+
+	// 以降TechBowlで追加された行
+	// TODO: サーバーをlistenする
 
 	return nil
 }
