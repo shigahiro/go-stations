@@ -19,4 +19,3 @@ mainで拡張機能を実行するとこのエラーがでる
 
 ![alt text](image.png)
 
-
