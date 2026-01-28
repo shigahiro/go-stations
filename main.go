@@ -1,7 +1,9 @@
 package main
 
 import (
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -51,6 +53,11 @@ func realMain() error {
 	mux := router.NewRouter(todoDB)
 
 	// TODO: サーバーをlistenする
+	helloHandler := func(w http.ResponseWriter, req *http.Request) {
+		io.WriteString(w, "Hello, world!\n")
+	}
+	mux.HandleFunc("/hello", helloHandler)
+	http.ListenAndServe(port, mux)
 
 	return nil
 }
