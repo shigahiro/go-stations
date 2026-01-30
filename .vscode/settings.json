@@ -1,0 +1,8 @@
+{
+  // goimportで自動フォーマット・不要なインポート削除を行う
+  "go.formatTool": "goimports",
+//   "go.lintTool": "golangci-lint",
+  // 保存時にgoimportsを実行する
+  "editor.formatOnSave": true,
+  "go.lintOnSave": "workspace"
+}
