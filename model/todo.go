@@ -5,6 +5,8 @@ import "time"
 type (
 	// A TODO expresses ...
 	TODO struct {
+		// 先頭大文字にするとエクスポートする
+		// 頭字語はすべて大文字・もしくは小文字にする
 		ID          int64     `json:"id"`
 		Subject     string    `json:"subject"`
 		Description string    `json:"description"`
@@ -13,9 +15,14 @@ type (
 	}
 
 	// A CreateTODORequest expresses ...
-	CreateTODORequest struct{}
+	CreateTODORequest struct {
+		Subject     string `json:"subject"`
+		Description string `json:"description"`
+	}
 	// A CreateTODOResponse expresses ...
-	CreateTODOResponse struct{}
+	CreateTODOResponse struct {
+		TODO TODO `json:"todo"`
+	}
 
 	// A ReadTODORequest expresses ...
 	ReadTODORequest struct{}
