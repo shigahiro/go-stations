@@ -26,12 +26,12 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 		insert  = `INSERT INTO todos(subject, description) VALUES(?, ?)`
 		confirm = `SELECT subject, description, created_at, updated_at FROM todos WHERE id = ?`
 	)
-	hoge, err := s.db.ExecContext(ctx, insert, subject, description)
+	result, err := s.db.ExecContext(ctx, insert, subject, description)
 	if err != nil {
 		return &model.TODO{}, err
 	}
 
-	id, err := hoge.LastInsertId()
+	id, err := result.LastInsertId()
 	if err != nil {
 		return &model.TODO{}, err
 	}
@@ -71,8 +71,36 @@ func (s *TODOService) UpdateTODO(ctx context.Context, id int64, subject, descrip
 		update  = `UPDATE todos SET subject = ?, description = ? WHERE id = ?`
 		confirm = `SELECT subject, description, created_at, updated_at FROM todos WHERE id = ?`
 	)
+	res, err := s.db.ExecContext(ctx, update, subject, description, id)
 
-	return nil, nil
+	if err != nil {
+		return &model.TODO{}, err
+	}
+
+	count, err := res.RowsAffected()
+	if err != nil {
+		return &model.TODO{}, err
+	}
+
+	if count == 0 {
+		return &model.TODO{}, &model.ErrNotFound{}
+	}
+
+	var (
+		createdAt time.Time
+		updatedAt time.Time
+	)
+	if err := s.db.QueryRowContext(ctx, confirm, id).Scan(&subject, &description, &createdAt, &updatedAt); err != nil {
+		return &model.TODO{}, err
+	}
+
+	return &model.TODO{
+		ID:          id,
+		Subject:     subject,
+		Description: description,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
+	}, nil
 }
 
 // DeleteTODO deletes TODOs on DB by ids.
