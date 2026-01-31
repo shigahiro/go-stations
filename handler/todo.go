@@ -46,30 +46,55 @@ func (h *TODOHandler) Delete(ctx context.Context, req *model.DeleteTODORequest) 
 }
 
 func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		return
+	if r.Method == "POST" {
+		decoder := json.NewDecoder(r.Body)
+		var reqBody model.CreateTODORequest
+		if err := decoder.Decode(&reqBody); err != nil {
+			return
+		}
+
+		if reqBody.Subject == "" {
+			http.Error(w, "400", http.StatusBadRequest)
+			return
+		}
+
+		todo, err := h.svc.CreateTODO(r.Context(), reqBody.Subject, reqBody.Description)
+
+		if err != nil {
+			return
+		}
+
+		encoder := json.NewEncoder(w)
+
+		if err := encoder.Encode(model.CreateTODOResponse{TODO: *todo}); err != nil {
+			return
+		}
 	}
 
-	decoder := json.NewDecoder(r.Body)
-	var reqBody model.CreateTODORequest
-	if err := decoder.Decode(&reqBody); err != nil {
-		return
+	if r.Method == "PUT" {
+		decoder := json.NewDecoder(r.Body)
+		var reqBody model.UpdateTODORequest
+		if err := decoder.Decode(&reqBody); err != nil {
+			return
+		}
+
+		if reqBody.ID == 0 || reqBody.Subject == "" {
+			http.Error(w, "400", http.StatusBadRequest)
+			return
+		}
+
+		todo, err := h.svc.UpdateTODO(r.Context(), reqBody.ID, reqBody.Subject, reqBody.Description)
+
+		if err != nil {
+			http.Error(w, "404", http.StatusNotFound)
+			return
+		}
+
+		encoder := json.NewEncoder(w)
+
+		if err := encoder.Encode(model.UpdateTODOResponse{TODO: *todo}); err != nil {
+			return
+		}
 	}
 
-	if reqBody.Subject == "" {
-		http.Error(w, "400", http.StatusBadRequest)
-		return
-	}
-
-	todo, err := h.svc.CreateTODO(r.Context(), reqBody.Subject, reqBody.Description)
-
-	if err != nil {
-		return
-	}
-
-	encoder := json.NewEncoder(w)
-
-	if err := encoder.Encode(model.CreateTODOResponse{TODO: *todo}); err != nil {
-		return
-	}
 }
