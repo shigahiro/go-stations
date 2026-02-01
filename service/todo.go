@@ -30,12 +30,12 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 	)
 	result, err := s.db.ExecContext(ctx, insert, subject, description)
 	if err != nil {
-		return &model.TODO{}, err
+		return nil, err
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return &model.TODO{}, err
+		return nil, err
 	}
 
 	var (
@@ -45,7 +45,7 @@ func (s *TODOService) CreateTODO(ctx context.Context, subject, description strin
 
 	err = s.db.QueryRowContext(ctx, confirm, id).Scan(&subject, &description, &createdAt, &updatedAt)
 	if err != nil {
-		return &model.TODO{}, err
+		return nil, err
 	}
 
 	return &model.TODO{
@@ -126,12 +126,12 @@ func (s *TODOService) UpdateTODO(ctx context.Context, id int64, subject, descrip
 	res, err := s.db.ExecContext(ctx, update, subject, description, id)
 
 	if err != nil {
-		return &model.TODO{}, err
+		return nil, err
 	}
 
 	count, err := res.RowsAffected()
 	if err != nil {
-		return &model.TODO{}, err
+		return nil, err
 	}
 
 	if count == 0 {
@@ -143,7 +143,7 @@ func (s *TODOService) UpdateTODO(ctx context.Context, id int64, subject, descrip
 		updatedAt time.Time
 	)
 	if err := s.db.QueryRowContext(ctx, confirm, id).Scan(&subject, &description, &createdAt, &updatedAt); err != nil {
-		return &model.TODO{}, err
+		return nil, err
 	}
 
 	return &model.TODO{
