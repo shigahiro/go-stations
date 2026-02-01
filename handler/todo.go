@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -122,4 +123,35 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	if r.Method == "DELETE" {
+		decoder := json.NewDecoder(r.Body)
+		var reqBody model.DeleteTODORequest
+		if err := decoder.Decode(&reqBody); err != nil {
+			return
+		}
+
+		if len(reqBody.IDs) == 0 {
+			http.Error(w, "400", http.StatusBadRequest)
+			return
+		}
+
+		if err := h.svc.DeleteTODO(r.Context(), reqBody.IDs); err != nil {
+			var notFoundErr *model.ErrNotFound
+
+			if errors.As(err, &notFoundErr) {
+				http.Error(w, "404", http.StatusNotFound)
+				return
+			}
+
+			return
+		}
+
+		encoder := json.NewEncoder(w)
+
+		if err := encoder.Encode(model.DeleteTODOResponse{}); err != nil {
+			return
+		}
+	}
+
 }
